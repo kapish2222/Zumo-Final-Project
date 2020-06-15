@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+import time
+import rospy
+#import numpy as np
+from geometry_msgs.msg import Twist
+#ddrom sensor_msgs.msg import Joy
+#from geometry_msgs.msg import Vector3Stamped
+import RPi.GPIO as GPIO
+
+rospy.init_node('control-node', anonymous=False)
+leftmotor_dir_pin = 2
+rightmotor_dir_pin = 3
+leftmotor_pwm_pin = 4
+rightmotor_pwm_pin = 14
+
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+
+GPIO.setup(leftmotor_dir_pin,GPIO.OUT)
+GPIO.setup(leftmotor_pwm_pin,GPIO.OUT)
+GPIO.setup(rightmotor_dir_pin,GPIO.OUT)
+GPIO.setup(rightmotor_pwm_pin,GPIO.OUT)
+leftmotorspeed = GPIO.PWM(leftmotor_pwm_pin,20)
+rightmotorspeed = GPIO.PWM(rightmotor_pwm_pin,20)
+
+def move(linearx,angularz):
+    leftmotor_speed = linearx - angularz
+    rightmotor_speed = linearx + angularz
+    leftmotor(leftmotor_speed)
+    rightmotor(rightmotor_speed)
+
+
+def leftmotor(speed):
+    if speed <  0 :
+        print("reverse left",abs(speed))
+        GPIO.output(leftmotor_dir_pin,GPIO.LOW)
+        leftmotorspeed.ChangeDutyCycle(abs(speed*100))
+
+    else:
+        print("forward left",abs(speed))
+        GPIO.output(leftmotor_dir_pin,GPIO.HIGH)
+        leftmotorspeed.ChangeDutyCycle(abs(speed*100))
+
+
+    
+
+
+def rightmotor(speed):
+    if speed < 0 :
+        print("reverse right",abs(speed))
+        GPIO.output(rightmotor_dir_pin,GPIO.LOW)
+        rightmotorspeed.ChangeDutyCycle(abs(speed*100))
+
+    else:
+        print("forward right",abs(speed))
+        GPIO.output(rightmotor_dir_pin,GPIO.HIGH)
+        rightmotorspeed.ChangeDutyCycle(abs(speed*100))
+    
+
+def callback(msg):
+
+	#x = msg.linear.x
+        #z = msg.angular.z
+        #rospy.loginfo("Received a /cmd_vel message!")
+        rospy.loginfo("Linear Components: [%f]"%(msg.linear.x))
+        rospy.loginfo("Angular Components: [%f]"%(msg.angular.z))
+        move(msg.linear.x,msg.angular.z)
+
+def listener_and_pub():
+	rospy.Subscriber("/cmd_vel", Twist, callback) #/cmd_vel /key_vel /ps3_vel /joy
+	rospy.spin()
+	
+if __name__ == '__main__':
+	try:
+		listener_and_pub()
+	except rospy.ROSInterruptException:
+		pass
