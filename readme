@@ -1,0 +1,21 @@
+ROS WEB CONTROL GUI
+
+The ros framework is using roslibjs to send messages to ros framework through web sockets.
+
+The gui.html file is located in robot-gui-bridge/gui folder
+
+the controlnode file (subscriber.py) is located in robotcontrol in scripts folder
+
+catkin_make inside the pibot directory 
+
+source devel/setup.bash
+
+roslaunch robot-gui-bridge websocket.launch
+
+got to robot-gui-bridge/gui folder
+
+run python -m SimpleHTTPServer 8000
+
+Open Browser and IP_ADDRESS_OF_PI:8000
+
+(NOTE: TO Change the ipaddress of pi got to gui.html and input the current ip address)
